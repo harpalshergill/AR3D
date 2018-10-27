@@ -1,0 +1,78 @@
+[
+ 
+ {
+     "modelName": "TempleOfCaesar",
+     "displayName": "Temple Of Caesar",
+     "particleScaleInfo": { }
+ },
+ {
+     "modelName": "BasilicaAemilia",
+     "displayName": "Basilica Aemilia",
+     "particleScaleInfo": { }
+ },
+ {
+     "modelName": "Tabularium",
+     "displayName": "Tabularium",
+     "particleScaleInfo": { }
+ },
+ {
+     "modelName": "SpringOfJuturna",
+     "displayName": "Spring Of Juturna",
+     "particleScaleInfo": { }
+ },
+ {
+     "modelName": "PorticoOf12Gods",
+     "displayName": "Portico Of 12 Gods",
+     "particleScaleInfo": { }
+ },
+ {
+     "modelName": "BasilicaJulia",
+     "displayName": "Basilica Julia",
+     "particleScaleInfo": { }
+ },
+ {
+     "modelName": "TempleCastorPollux",
+     "displayName": "Temple Of CastorPollux",
+     "particleScaleInfo": { }
+ },
+ {
+     "modelName": "TempleOfConcord",
+     "displayName": "Temple Of Concord",
+     "particleScaleInfo": { }
+ },
+ {
+     "modelName": "TempleOfSaturn",
+     "displayName": "Temple Of Saturn",
+     "particleScaleInfo": { }
+ },
+ {
+     "modelName": "TempleOfVespasian",
+     "displayName": "Temple Of Vespasian",
+     "particleScaleInfo": { }
+ },
+ {
+     "modelName": "TempleOfVesta",
+     "displayName": "Temple Of Vesta",
+     "particleScaleInfo": { }
+     
+ },
+ {
+     "modelName": "Fourm",
+     "displayName": "Fourm",
+     "particleScaleInfo": { }
+ },
+ {
+ "modelName": "Colosseum",
+ "displayName": "Colosseum",
+ "particleScaleInfo": { }
+ },
+ 
+
+ 
+ {
+ "modelName": "ColosseumCenterView",
+ "displayName": "Colosseum Center View",
+ "particleScaleInfo": { }
+ },
+                ]
+ 
