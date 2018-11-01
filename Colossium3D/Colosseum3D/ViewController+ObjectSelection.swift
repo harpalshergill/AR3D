@@ -1,72 +1,116 @@
+//
+//  ViewController+ObjectSelection.swift
+//  Colosseum3D
+//
+//  Created by Harpal Shergill on 10/28/18.
+//  Copyright © 2018 harpalshergill. All rights reserved.
+//
 /*
-See LICENSE folder for this sample’s licensing information.
-
 Abstract:
 Methods on the main view controller for handling virtual object loading and movement
 */
 
 import UIKit
-import SceneKit
+import ARKit
 
-extension ViewController: VirtualObjectSelectionViewControllerDelegate, VirtualObjectManagerDelegate {
-    
-    // MARK: - VirtualObjectManager delegate callbacks
-    
-    func virtualObjectManager(_ manager: VirtualObjectManager, willLoad object: VirtualObject) {
-        DispatchQueue.main.async {
-            // Show progress indicator
-            self.spinner = UIActivityIndicatorView()
-            self.spinner!.center = self.addObjectButton.center
-            self.spinner!.bounds.size = CGSize(width: self.addObjectButton.bounds.width - 5, height: self.addObjectButton.bounds.height - 5)
-            self.addObjectButton.setImage(#imageLiteral(resourceName: "buttonring"), for: [])
-            self.sceneView.addSubview(self.spinner!)
-            self.spinner!.startAnimating()
-            
-            self.isLoadingObject = true
+extension ViewController: VirtualObjectSelectionViewControllerDelegate {
+    /**
+     Adds the specified virtual object to the scene, placed at the world-space position
+     estimated by a hit test from the center of the screen.
+     
+     - Tag: PlaceVirtualObject
+     */
+    func placeVirtualObject(_ virtualObject: VirtualObject) {
+        print(focusSquare.state)
+        guard focusSquare.state != .initializing else {
+            print("1")
+            statusViewController.showMessage("CANNOT PLACE OBJECT\nRefresh and try again.")
+            if let controller = objectsViewController {
+                print("2")
+                virtualObjectSelectionViewController(controller, didDeselectObject: virtualObject)
+            }
+            return
         }
+        
+        virtualObjectInteraction.translate(virtualObject, basedOn: screenCenter, infinitePlane: false, allowAnimation: false)
+        virtualObjectInteraction.selectedObject = virtualObject
+        print(virtualObject.modelName)
+        updateQueue.async {
+            self.sceneView.scene.rootNode.addChildNode(virtualObject)
+            self.sceneView.addOrUpdateAnchor(for: virtualObject)
+        }
+        print("3")
     }
     
-    func virtualObjectManager(_ manager: VirtualObjectManager, didLoad object: VirtualObject) {
-        DispatchQueue.main.async {
-            self.isLoadingObject = false
-            
-            // Remove progress indicator
-            self.spinner?.removeFromSuperview()
-            self.addObjectButton.setImage(#imageLiteral(resourceName: "add"), for: [])
-            self.addObjectButton.setImage(#imageLiteral(resourceName: "addPressed"), for: [.highlighted])
+    func RecoverplaceVirtualObjectForced(_ virtualObject: VirtualObject) {
+        print(focusSquare.state)
+//        guard focusSquare.state != .initializing else {
+//            print("1")
+//            statusViewController.showMessage("CANNOT PLACE OBJECT\nRefresh and try again.")
+//            if let controller = objectsViewController {
+//                print("2")
+//                virtualObjectSelectionViewController(controller, didDeselectObject: virtualObject)
+//            }
+//            return
+//        }
+        
+        virtualObjectInteraction.translate(virtualObject, basedOn: screenCenter, infinitePlane: false, allowAnimation: false)
+        virtualObjectInteraction.selectedObject = virtualObject
+        print(virtualObject.modelName)
+        updateQueue.async {
+            self.sceneView.scene.rootNode.addChildNode(virtualObject)
+            self.sceneView.addOrUpdateAnchor(for: virtualObject)
         }
-    }
-    
-    func virtualObjectManager(_ manager: VirtualObjectManager, couldNotPlace object: VirtualObject) {
-        textManager.showMessage("CANNOT PLACE OBJECT\nTry moving left or right.")
+        print("3")
     }
     
     // MARK: - VirtualObjectSelectionViewControllerDelegate
     
-    func virtualObjectSelectionViewController(_: VirtualObjectSelectionViewController, didSelectObjectAt index: Int) {
-        guard let cameraTransform = session.currentFrame?.camera.transform else {
-            return
+    func virtualObjectSelectionViewController(_: VirtualObjectSelectionViewController, didSelectObject object: VirtualObject) {
+        virtualObjectLoader.loadVirtualObject(object, loadedHandler: { [unowned self] loadedObject in
+            self.sceneView.prepare([object], completionHandler: { _ in
+                DispatchQueue.main.async {
+                    self.hideObjectLoadingUI()
+                    self.placeVirtualObject(loadedObject)
+                    loadedObject.isHidden = false
+                }
+            })
+        })
+        
+        displayObjectLoadingUI()
+    }
+    
+    func virtualObjectSelectionViewController(_: VirtualObjectSelectionViewController, didDeselectObject object: VirtualObject) {
+        guard let objectIndex = virtualObjectLoader.loadedObjects.index(of: object) else {
+            fatalError("Programmer error: Failed to lookup virtual object in scene.")
         }
-
-        //remove existing models
-        self.virtualObjectManager.removeAllVirtualObjects()
-
-        let definition = VirtualObjectManager.availableObjects[index]
-        let object = VirtualObject(definition: definition)
-        
-        // if location is provided then use that instead of position from 4Squares
-        
-        let position = focusSquare?.lastPosition ?? float3(0)
-        virtualObjectManager.loadVirtualObject(object, to: position, cameraTransform: cameraTransform)
-        if object.parent == nil {
-            serialQueue.async {
-                self.sceneView.scene.rootNode.addChildNode(object)
-            }
+        virtualObjectLoader.removeVirtualObject(at: objectIndex)
+        virtualObjectInteraction.selectedObject = nil
+        if let anchor = object.anchor {
+            session.remove(anchor: anchor)
         }
     }
     
-    func virtualObjectSelectionViewController(_: VirtualObjectSelectionViewController, didDeselectObjectAt index: Int) {
-        virtualObjectManager.removeVirtualObject(at: index)
+    // MARK: Object Loading UI
+    
+    func displayObjectLoadingUI() {
+        // Show progress indicator.
+        spinner.startAnimating()
+        
+        addObjectButton.setImage(#imageLiteral(resourceName: "buttonring"), for: [])
+        
+        addObjectButton.isEnabled = false
+        isRestartAvailable = false
     }
     
+    func hideObjectLoadingUI() {
+        // Hide progress indicator.
+        spinner.stopAnimating()
+        
+        addObjectButton.setImage(#imageLiteral(resourceName: "add"), for: [])
+        addObjectButton.setImage(#imageLiteral(resourceName: "addPressed"), for: [.highlighted])
+        
+        addObjectButton.isEnabled = true
+        isRestartAvailable = true
+    }
 }

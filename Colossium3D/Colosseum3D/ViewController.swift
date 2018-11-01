@@ -1,9 +1,10 @@
-/*
-See LICENSE folder for this sample’s licensing information.
-
-Abstract:
-Main view controller for the AR experience.
-*/
+//
+//  ViewController.swift
+//  Colosseum3D
+//
+//  Created by Harpal Shergill on 10/28/18.
+//  Copyright © 2018 harpalshergill. All rights reserved.
+//
 
 import ARKit
 import SceneKit
@@ -11,260 +12,185 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    // MARK: - ARKit Config Properties
+    // MARK: IBOutlets
     
-    var screenCenter: CGPoint?
-
-    let session = ARSession()
-    let standardConfiguration: ARWorldTrackingConfiguration = {
-        let configuration = ARWorldTrackingConfiguration()
-        configuration.planeDetection = .horizontal
-        return configuration
-    }()
+    @IBOutlet var sceneView: VirtualObjectARView!
     
-    // MARK: - Virtual Object Manipulation Properties
+    @IBOutlet weak var addObjectButton: UIButton!
     
-    var dragOnInfinitePlanesEnabled = false
-    var virtualObjectManager: VirtualObjectManager!
+    @IBOutlet weak var blurView: UIVisualEffectView!
     
-    var isLoadingObject: Bool = false {
-        didSet {
-            DispatchQueue.main.async {
-                //self.settingsButton.isEnabled = !self.isLoadingObject
-                self.addObjectButton.isEnabled = !self.isLoadingObject
-                self.restartExperienceButton.isEnabled = !self.isLoadingObject
-            }
-        }
+    @IBOutlet weak var spinner: UIActivityIndicatorView!
+    
+    @IBAction func scaleSlider(_ sender: UISlider) {
     }
     
-    // MARK: - Other Properties
-    
-    var textManager: TextManager!
-    var restartExperienceButtonIsEnabled = true
     
     // MARK: - UI Elements
     
-    var spinner: UIActivityIndicatorView?
+    var focusSquare = FocusSquare()
     
-    @IBOutlet var sceneView: ARSCNView!
-    @IBOutlet weak var messagePanel: UIView!
-    @IBOutlet weak var messageLabel: UILabel!
-    @IBOutlet weak var settingsButton: UIButton!
-    @IBOutlet weak var addObjectButton: UIButton!
-    @IBOutlet weak var scaleObjectButton: UIButton!
-    @IBOutlet weak var restartExperienceButton: UIButton!
+    var vObject = [VirtualObject]()
     
-    @IBOutlet weak var scaleSlider: UISlider!
+    /// The view controller that displays the status and "restart experience" UI.
+    lazy var statusViewController: StatusViewController = {
+        return childViewControllers.lazy.compactMap({ $0 as? StatusViewController }).first!
+    }()
     
-    // MARK: - Queues
+    /// The view controller that displays the virtual object selection menu.
+    var objectsViewController: VirtualObjectSelectionViewController?
     
-	let serialQueue = DispatchQueue(label: "com.apple.arkitexample.serialSceneKitQueue")
-	
+    // MARK: - ARKit Configuration Properties
+    
+    /// A type which manages gesture manipulation of virtual content in the scene.
+    lazy var virtualObjectInteraction = VirtualObjectInteraction(sceneView: sceneView)
+    
+    /// Coordinates the loading and unloading of reference nodes for virtual objects.
+    let virtualObjectLoader = VirtualObjectLoader()
+    
+    /// Marks if the AR experience is available for restart.
+    var isRestartAvailable = true
+    
+    /// A serial queue used to coordinate adding or removing nodes from the scene.
+    let updateQueue = DispatchQueue(label: "theshergill.com.Colosseum3D.v2.serialSceneKitQueue")
+    
+    var screenCenter: CGPoint {
+        let bounds = sceneView.bounds
+        return CGPoint(x: bounds.midX, y: bounds.midY)
+    }
+    
+    /// Convenience accessor for the session owned by ARSCNView.
+    var session: ARSession {
+        return sceneView.session
+    }
+    
     // MARK: - View Controller Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        Setting.registerDefaults()
-		setupUIControls()
-        setupScene()
-    }
-
-	override func viewDidAppear(_ animated: Bool) {
-		super.viewDidAppear(animated)
-		
-		// Prevent the screen from being dimmed after a while.
-		UIApplication.shared.isIdleTimerDisabled = true
-		
-		if ARWorldTrackingConfiguration.isSupported {
-			// Start the ARSession.
-			resetTracking()
-            
-            textManager.blurBackground()
-            textManager.unblurBackground()
-            
-		} else {
-			// This device does not support 6DOF world tracking.
-			let sessionErrorMsg = "This app requires world tracking. World tracking is only available on iOS devices with A9 processor or newer. " +
-			"Please quit the application."
-			displayErrorMessage(title: "Unsupported platform", message: sessionErrorMsg, allowRestart: false)
-		}
-	}
-	
-	override func viewWillDisappear(_ animated: Bool) {
-		super.viewWillDisappear(animated)
-		session.pause()
-	}
-	
-    // MARK: - Setup
-    
-	func setupScene() {
-        // Synchronize updates via the `serialQueue`.
-        virtualObjectManager = VirtualObjectManager(updateQueue: serialQueue)
-        virtualObjectManager.delegate = self
-		
-		// set up scene view
-		sceneView.setup()
-		sceneView.delegate = self
-		sceneView.session = session
-		// sceneView.showsStatistics = true
         
-        loadInitial()
+        sceneView.delegate = self
+        sceneView.session.delegate = self
         
-		sceneView.scene.enableEnvironmentMapWithIntensity(25, queue: serialQueue)
-		
-        //setupFocusSquare()
-		
-		DispatchQueue.main.async {
-			self.screenCenter = self.sceneView.bounds.mid
-		}
-	}
-    
-    func loadInitial(){
-        let definition = VirtualObjectManager.availableObjects[0]
-        let object = VirtualObject(definition: definition)
+        // Set up scene content.
+        setupCamera()
+        //sceneView.scene.rootNode.addChildNode(focusSquare)
+//        let obj = VirtualObject.availableObjects.last
+//        print(obj?.modelName as Any)
+//        self.placeVirtualObjectForced(obj!)
         
-        // if location is provided then use that instead of position from 4Squares
+        //sceneView.scene.rootNode.addChildNode(obj!)
+//        updateQueue.async {
+//            self.sceneView.scene.rootNode.addChildNode(obj!)
+//            self.sceneView.addOrUpdateAnchor(for: obj!)
+//        }
+        sceneView.setupDirectionalLighting(queue: updateQueue)
         
-        virtualObjectManager.loadVirtualObject(object)
-        if object.parent == nil {
-            serialQueue.async {
-                self.sceneView.scene.rootNode.addChildNode(object)
-                
-            }
+        // Hook up status view controller callback(s).
+        statusViewController.restartExperienceHandler = { [unowned self] in
+            self.restartExperience()
         }
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(showVirtualObjectSelectionViewController))
+        // Set the delegate to ensure this gesture is only used when there are no virtual objects in the scene.
+        tapGesture.delegate = self
+        sceneView.addGestureRecognizer(tapGesture)
+        
+        print("4")
     }
     
-    func setupUIControls() {
-        textManager = TextManager(viewController: self)
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         
-        // Set appearance of message output panel
-        messagePanel.layer.cornerRadius = 3.0
-        messagePanel.clipsToBounds = true
-        messagePanel.isHidden = true
-        messageLabel.text = ""
+        // Prevent the screen from being dimmed to avoid interuppting the AR experience.
+        UIApplication.shared.isIdleTimerDisabled = true
+        
+        // Start the `ARSession`.
+        resetTracking()
     }
-	
-    // MARK: - Gesture Recognizers
-	
-	override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-		virtualObjectManager.reactToTouchesBegan(touches, with: event, in: self.sceneView)
-	}
-	
-	override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-		virtualObjectManager.reactToTouchesMoved(touches, with: event)
-	}
-	
-	override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-		if virtualObjectManager.virtualObjects.isEmpty {
-			chooseObject(addObjectButton)
-			return
-		}
-		virtualObjectManager.reactToTouchesEnded(touches, with: event)
-	}
-	
-	override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-		virtualObjectManager.reactToTouchesCancelled(touches, with: event)
-	}
-	
-    // MARK: - Planes
-	
-	var planes = [ARPlaneAnchor: Plane]()
-	
-    func addPlane(node: SCNNode, anchor: ARPlaneAnchor) {
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
         
-		let plane = Plane(anchor)
-		planes[anchor] = plane
-		node.addChildNode(plane)
-		
-		textManager.cancelScheduledMessage(forType: .planeEstimation)
-		textManager.showMessage("SURFACE DETECTED")
-		if virtualObjectManager.virtualObjects.isEmpty {
-			textManager.scheduleMessage("TAP + TO PLACE COLOSSO", inSeconds: 0.5, messageType: .contentPlacement)
-		}
-	}
-		
-    func updatePlane(anchor: ARPlaneAnchor) {
-        if let plane = planes[anchor] {
-			plane.update(anchor)
-		}
-	}
-			
-    func removePlane(anchor: ARPlaneAnchor) {
-		if let plane = planes.removeValue(forKey: anchor) {
-			plane.removeFromParentNode()
+        session.pause()
+    }
+    
+    // MARK: - Scene content setup
+    
+    func setupCamera() {
+        guard let camera = sceneView.pointOfView?.camera else {
+            fatalError("Expected a valid `pointOfView` from the scene.")
         }
+        
+        /*
+         Enable HDR camera settings for the most realistic appearance
+         with environmental lighting and physically based materials.
+         */
+        camera.wantsHDR = true
+        camera.exposureOffset = -1
+        camera.minimumExposure = -1
+        camera.maximumExposure = 3
     }
-	
-	func resetTracking() {
-		session.run(standardConfiguration, options: [.resetTracking, .removeExistingAnchors])
-		
-        textManager.showMessage("Welcome! Find a Surface to Place Model!", autoHide: false)
-	}
-
+    
+    // MARK: - Session management
+    
+    /// Creates a new AR configuration to run on the `session`.
+    func resetTracking() {
+        virtualObjectInteraction.selectedObject = nil
+        
+        let configuration = ARWorldTrackingConfiguration()
+        configuration.planeDetection = [.horizontal, .vertical]
+        if #available(iOS 12.0, *) {
+            configuration.environmentTexturing = .automatic
+        }
+        session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+        
+        statusViewController.scheduleMessage("FIND A SURFACE TO PLACE AN OBJECT", inSeconds: 7.5, messageType: .planeEstimation)
+    }
+    
     // MARK: - Focus Square
     
-    var focusSquare: FocusSquare?
-	
-    func setupFocusSquare() {
-		serialQueue.async {
-			self.focusSquare?.isHidden = true
-			self.focusSquare?.removeFromParentNode()
-			self.focusSquare = FocusSquare()
-			self.sceneView.scene.rootNode.addChildNode(self.focusSquare!)
-		}
-		
-		textManager.scheduleMessage("TRY MOVING LEFT OR RIGHT", inSeconds: 5.0, messageType: .focusSquare)
+    func updateFocusSquare(isObjectVisible: Bool) {
+        if isObjectVisible {
+            focusSquare.hide()
+        } else {
+            focusSquare.unhide()
+            statusViewController.scheduleMessage("TRY MOVING LEFT OR RIGHT", inSeconds: 5.0, messageType: .focusSquare)
+        }
+        
+        // Perform hit testing only when ARKit tracking is in a good state.
+        if let camera = session.currentFrame?.camera, case .normal = camera.trackingState,
+            let result = self.sceneView.smartHitTest(screenCenter) {
+            updateQueue.async {
+                self.sceneView.scene.rootNode.addChildNode(self.focusSquare)
+                self.focusSquare.state = .detecting(hitTestResult: result, camera: camera)
+            }
+            addObjectButton.isHidden = false
+            statusViewController.cancelScheduledMessage(for: .focusSquare)
+        } else {
+            updateQueue.async {
+                self.focusSquare.state = .initializing
+                self.sceneView.pointOfView?.addChildNode(self.focusSquare)
+            }
+            addObjectButton.isHidden = true
+        }
     }
-	
-	func updateFocusSquare() {
-		guard let screenCenter = screenCenter else { return }
-		
-		DispatchQueue.main.async {
-			var objectVisible = false
-			for object in self.virtualObjectManager.virtualObjects {
-				if self.sceneView.isNode(object, insideFrustumOf: self.sceneView.pointOfView!) {
-					objectVisible = true
-					break
-				}
-			}
-			
-			if objectVisible {
-				self.focusSquare?.hide()
-			} else {
-				self.focusSquare?.unhide()
-			}
-			
-            let (worldPos, planeAnchor, _) = self.virtualObjectManager.worldPositionFromScreenPosition(screenCenter,
-                                                                                                       in: self.sceneView,
-                                                                                                       objectPos: self.focusSquare?.simdPosition)
-			if let worldPos = worldPos {
-				self.serialQueue.async {
-					self.focusSquare?.update(for: worldPos, planeAnchor: planeAnchor, camera: self.session.currentFrame?.camera)
-				}
-				self.textManager.cancelScheduledMessage(forType: .focusSquare)
-			}
-		}
-	}
     
-	// MARK: - Error handling
-	
-	func displayErrorMessage(title: String, message: String, allowRestart: Bool = false) {
-		// Blur the background.
-		textManager.blurBackground()
-		
-		if allowRestart {
-			// Present an alert informing about the error that has occurred.
-			let restartAction = UIAlertAction(title: "Reset", style: .default) { _ in
-				self.textManager.unblurBackground()
-				self.restartExperience(self)
-			}
-			textManager.showAlert(title: title, message: message, actions: [restartAction])
-		} else {
-			textManager.showAlert(title: title, message: message, actions: [])
-		}
-	}
+    // MARK: - Error handling
+    
+    func displayErrorMessage(title: String, message: String) {
+        // Blur the background.
+        blurView.isHidden = false
+        
+        // Present an alert informing about the error that has occurred.
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let restartAction = UIAlertAction(title: "Restart Session", style: .default) { _ in
+            alertController.dismiss(animated: true, completion: nil)
+            self.blurView.isHidden = true
+            self.resetTracking()
+        }
+        alertController.addAction(restartAction)
+        present(alertController, animated: true, completion: nil)
+    }
     
 }
-
-

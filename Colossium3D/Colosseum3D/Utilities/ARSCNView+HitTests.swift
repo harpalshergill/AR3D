@@ -23,9 +23,9 @@ extension ARSCNView {
         let featureDistanceToHitResult: Float
     }
     
-    func unprojectPoint(_ point: float3) -> float3 {
-        return float3(self.unprojectPoint(SCNVector3(point)))
-    }
+//    func unprojectPoint(_ point: float3) -> float3 {
+//        return float3(self.unprojectPoint(SCNVector3(point)))
+//    }
     
     // MARK: - Hit Tests
     
