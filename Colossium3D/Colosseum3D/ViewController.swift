@@ -22,10 +22,69 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var spinner: UIActivityIndicatorView!
     
-    @IBAction func scaleSlider(_ sender: UISlider) {
+    @IBOutlet weak var segmentControl: UISegmentedControl!
+    @IBAction func indexChange(_ sender: UISegmentedControl) {
+        var scale = 0.0
+        var positiony = 0.0
+        switch segmentControl.selectedSegmentIndex
+        {
+        case 0:
+            scale = 0.03
+            positiony = -1.5
+        case 1:
+            scale = 0.01
+            positiony = 0
+        case 2:
+            scale = 0.001
+            positiony = 0
+        default:
+            scale = 0.001
+            break
+        }
+        updateQueue.async {
+            self.sceneView.scene.rootNode.enumerateChildNodes { (node, _) in
+                if node.name == "SketchUp"{
+                    
+                    var obj = self.virtualObjectLoader.loadedObjects
+                    
+                    switch(obj[0].modelName){
+                    case "Colosseum":
+                        if(scale == 0.01){
+                            node.scale = SCNVector3(x: Float(0.001), y: Float(0.001), z: Float(0.001))
+                            node.position = SCNVector3(0.0, positiony, 0.0)
+                        }
+                        else if (scale == 0.001){
+                            node.scale = SCNVector3(x: Float(0.0002), y: Float(0.0002), z: Float(0.0002))
+                            node.position = SCNVector3(0.0, positiony, 0.0)
+                        } else{
+                            node.scale = SCNVector3(x: Float(scale), y: Float(scale), z: Float(scale))
+                            node.position = SCNVector3(0.0, -1.0, 0.0)
+                        }
+                    case "Fourm":
+                        if(scale == 0.01){
+                            node.scale = SCNVector3(x: Float(scale), y: Float(scale), z: Float(scale))
+                            node.position = SCNVector3(-50.0, -2.0, 50.0)
+                        }
+                        else if (scale == 0.001){
+                            node.scale = SCNVector3(x: Float(scale), y: Float(scale), z: Float(scale))
+                            node.position = SCNVector3(-10.0, -2.0, 10.0)
+                        } else{
+                            node.scale = SCNVector3(x: Float(scale), y: Float(scale), z: Float(scale))
+                            node.position = SCNVector3(-250.0, -1.0, 210.0)
+                        }
+                    default:
+                        node.scale = SCNVector3(x: Float(scale), y: Float(scale), z: Float(scale))
+                        node.position = SCNVector3(0.0, -1.0, 0.0)
+                        break;
+                    }
+                    
+                    //print(obj[0].modelName)
+                    
+                }
+            }
+        }
+        
     }
-    
-    
     // MARK: - UI Elements
     
     var focusSquare = FocusSquare()
@@ -72,6 +131,8 @@ class ViewController: UIViewController {
         sceneView.delegate = self
         sceneView.session.delegate = self
         
+        self.segmentControl.isHidden = true
+        
         // Set up scene content.
         setupCamera()
         //sceneView.scene.rootNode.addChildNode(focusSquare)
@@ -96,7 +157,7 @@ class ViewController: UIViewController {
         tapGesture.delegate = self
         sceneView.addGestureRecognizer(tapGesture)
         
-        print("4")
+        //print("4")
     }
     
     override func viewDidAppear(_ animated: Bool) {

@@ -46,6 +46,9 @@ extension ViewController: UIGestureRecognizerDelegate {
         
         statusViewController.cancelAllScheduledMessages()
         
+        segmentControl.selectedSegmentIndex = 0
+        segmentControl.isHidden = true
+        
         virtualObjectLoader.removeAllVirtualObjects()
         addObjectButton.setImage(#imageLiteral(resourceName: "add"), for: [])
         addObjectButton.setImage(#imageLiteral(resourceName: "addPressed"), for: [.highlighted])

@@ -21,12 +21,12 @@ extension ViewController: VirtualObjectSelectionViewControllerDelegate {
      - Tag: PlaceVirtualObject
      */
     func placeVirtualObject(_ virtualObject: VirtualObject) {
-        print(focusSquare.state)
+        //print(focusSquare.state)
         guard focusSquare.state != .initializing else {
-            print("1")
+            //print("1")
             statusViewController.showMessage("CANNOT PLACE OBJECT\nRefresh and try again.")
             if let controller = objectsViewController {
-                print("2")
+                //print("2")
                 virtualObjectSelectionViewController(controller, didDeselectObject: virtualObject)
             }
             return
@@ -34,12 +34,13 @@ extension ViewController: VirtualObjectSelectionViewControllerDelegate {
         
         virtualObjectInteraction.translate(virtualObject, basedOn: screenCenter, infinitePlane: false, allowAnimation: false)
         virtualObjectInteraction.selectedObject = virtualObject
-        print(virtualObject.modelName)
+        
         updateQueue.async {
             self.sceneView.scene.rootNode.addChildNode(virtualObject)
             self.sceneView.addOrUpdateAnchor(for: virtualObject)
         }
-        print("3")
+        
+        segmentControl.isHidden = false
     }
     
     func RecoverplaceVirtualObjectForced(_ virtualObject: VirtualObject) {
@@ -61,7 +62,7 @@ extension ViewController: VirtualObjectSelectionViewControllerDelegate {
             self.sceneView.scene.rootNode.addChildNode(virtualObject)
             self.sceneView.addOrUpdateAnchor(for: virtualObject)
         }
-        print("3")
+        //print("3")
     }
     
     // MARK: - VirtualObjectSelectionViewControllerDelegate
@@ -71,6 +72,7 @@ extension ViewController: VirtualObjectSelectionViewControllerDelegate {
             self.sceneView.prepare([object], completionHandler: { _ in
                 DispatchQueue.main.async {
                     self.hideObjectLoadingUI()
+                    self.segmentControl.selectedSegmentIndex = 0
                     self.placeVirtualObject(loadedObject)
                     loadedObject.isHidden = false
                 }
