@@ -136,15 +136,9 @@ class ViewController: UIViewController {
         // Set up scene content.
         setupCamera()
         //sceneView.scene.rootNode.addChildNode(focusSquare)
-//        let obj = VirtualObject.availableObjects.last
-//        print(obj?.modelName as Any)
-//        self.placeVirtualObjectForced(obj!)
-        
-        //sceneView.scene.rootNode.addChildNode(obj!)
-//        updateQueue.async {
-//            self.sceneView.scene.rootNode.addChildNode(obj!)
-//            self.sceneView.addOrUpdateAnchor(for: obj!)
-//        }
+        let obj = VirtualObject.availableObjects.last
+        loadme(object: obj!)
+
         sceneView.setupDirectionalLighting(queue: updateQueue)
         
         // Hook up status view controller callback(s).
@@ -158,6 +152,21 @@ class ViewController: UIViewController {
         sceneView.addGestureRecognizer(tapGesture)
         
         //print("4")
+    }
+    
+    func loadme(object: VirtualObject){
+        virtualObjectLoader.loadVirtualObject(object, loadedHandler: { [unowned self] loadedObject in
+            self.sceneView.prepare([object], completionHandler: { _ in
+                DispatchQueue.main.async {
+                    self.hideObjectLoadingUI()
+                    self.segmentControl.selectedSegmentIndex = 0
+                    self.placeVirtualObject(loadedObject)
+                    loadedObject.isHidden = false
+                }
+            })
+        })
+        
+        displayObjectLoadingUI()
     }
     
     override func viewDidAppear(_ animated: Bool) {
