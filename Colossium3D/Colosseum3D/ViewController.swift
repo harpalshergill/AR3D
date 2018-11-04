@@ -141,7 +141,7 @@ class ViewController: UIViewController {
         setupCamera()
         //sceneView.scene.rootNode.addChildNode(focusSquare)
         
-        let obj = VirtualObject.findObject("templeofcaesar")
+        let obj = VirtualObject.findObject("colosseum")
         loadme(object: obj!)
 
         sceneView.setupDirectionalLighting(queue: updateQueue)
