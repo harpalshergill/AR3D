@@ -23,6 +23,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var spinner: UIActivityIndicatorView!
     
     @IBOutlet weak var segmentControl: UISegmentedControl!
+    
     @IBAction func indexChange(_ sender: UISegmentedControl) {
         var scale = 0.0
         var positiony = 0.0
@@ -39,8 +40,11 @@ class ViewController: UIViewController {
             positiony = 0
         default:
             scale = 0.001
+            positiony = -1.5
             break
         }
+        
+        //print(self.virtualObjectLoader.loadedObjects[0].modelName)
         updateQueue.async {
             self.sceneView.scene.rootNode.enumerateChildNodes { (node, _) in
                 if node.name == "SketchUp"{
@@ -60,7 +64,7 @@ class ViewController: UIViewController {
                             node.scale = SCNVector3(x: Float(scale), y: Float(scale), z: Float(scale))
                             node.position = SCNVector3(0.0, -1.0, 0.0)
                         }
-                    case "Fourm":
+                    case "RomanForum":
                         if(scale == 0.01){
                             node.scale = SCNVector3(x: Float(scale), y: Float(scale), z: Float(scale))
                             node.position = SCNVector3(-50.0, -2.0, 50.0)
@@ -150,8 +154,10 @@ class ViewController: UIViewController {
         // Set the delegate to ensure this gesture is only used when there are no virtual objects in the scene.
         tapGesture.delegate = self
         sceneView.addGestureRecognizer(tapGesture)
-        
-        //print("4")
+    }
+    
+    deinit {
+        print("deinit")
     }
     
     func loadme(object: VirtualObject){

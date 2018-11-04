@@ -36,6 +36,7 @@ extension ViewController: VirtualObjectSelectionViewControllerDelegate {
         virtualObjectInteraction.selectedObject = virtualObject
         
         updateQueue.async {
+            self.sceneView.scene.rootNode.cleanup()
             self.sceneView.scene.rootNode.addChildNode(virtualObject)
             self.sceneView.addOrUpdateAnchor(for: virtualObject)
         }
@@ -43,17 +44,16 @@ extension ViewController: VirtualObjectSelectionViewControllerDelegate {
         segmentControl.isHidden = false
     }
     
+    
+    
     func RecoverplaceVirtualObjectForced(_ virtualObject: VirtualObject) {
-        print(focusSquare.state)
-//        guard focusSquare.state != .initializing else {
-//            print("1")
-//            statusViewController.showMessage("CANNOT PLACE OBJECT\nRefresh and try again.")
-//            if let controller = objectsViewController {
-//                print("2")
-//                virtualObjectSelectionViewController(controller, didDeselectObject: virtualObject)
-//            }
-//            return
-//        }
+        guard focusSquare.state != .initializing else {
+            statusViewController.showMessage("CANNOT PLACE OBJECT\nRefresh and try again.")
+            if let controller = objectsViewController {
+                virtualObjectSelectionViewController(controller, didDeselectObject: virtualObject)
+            }
+            return
+        }
         
         virtualObjectInteraction.translate(virtualObject, basedOn: screenCenter, infinitePlane: false, allowAnimation: false)
         virtualObjectInteraction.selectedObject = virtualObject
@@ -62,7 +62,6 @@ extension ViewController: VirtualObjectSelectionViewControllerDelegate {
             self.sceneView.scene.rootNode.addChildNode(virtualObject)
             self.sceneView.addOrUpdateAnchor(for: virtualObject)
         }
-        //print("3")
     }
     
     // MARK: - VirtualObjectSelectionViewControllerDelegate

@@ -151,4 +151,15 @@ extension SCNView {
     func unprojectPoint(_ point: float3) -> float3 {
         return float3(unprojectPoint(SCNVector3(point)))
     }
+    
+    
+}
+
+extension SCNNode{
+    func cleanup() {
+        for child in childNodes {
+            child.cleanup()
+        }
+        geometry = nil
+    }
 }

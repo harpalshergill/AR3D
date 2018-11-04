@@ -11,6 +11,7 @@
 		3929C48C1E89EC2C00E00B60 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3929C48B1E89EC2C00E00B60 /* AppDelegate.swift */; };
 		3929C49F1E89EE4400E00B60 /* Models.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 3929C49E1E89EE4400E00B60 /* Models.scnassets */; };
 		F2B68E7820F82E1200423E57 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F2B68E7720F82E1200423E57 /* Assets.xcassets */; };
+		F2E565D6218E85C400D0BAE7 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F2E565D5218E85C400D0BAE7 /* Launch Screen.storyboard */; };
 		F2E6915E2186913500619550 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E6915D2186913500619550 /* ViewController.swift */; };
 		F2E69162218691E200619550 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E69161218691E200619550 /* Utilities.swift */; };
 		F2E691642186923500619550 /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E691632186923500619550 /* StatusViewController.swift */; };
@@ -37,6 +38,7 @@
 		3929C49E1E89EE4400E00B60 /* Models.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = Models.scnassets; sourceTree = "<group>"; };
 		3C2F880B9F1F567D5404F826 /* SampleCode.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = SampleCode.xcconfig; path = Configuration/SampleCode.xcconfig; sourceTree = "<group>"; };
 		F2B68E7720F82E1200423E57 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F2E565D5218E85C400D0BAE7 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		F2E6915D2186913500619550 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		F2E69161218691E200619550 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		F2E691632186923500619550 /* StatusViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusViewController.swift; sourceTree = "<group>"; };
@@ -89,6 +91,7 @@
 				3929C49E1E89EE4400E00B60 /* Models.scnassets */,
 				3929C4971E89EC2C00E00B60 /* Info.plist */,
 				F2E6917C21869AEA00619550 /* Main.storyboard */,
+				F2E565D5218E85C400D0BAE7 /* Launch Screen.storyboard */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -229,6 +232,7 @@
 				1137ED1F1F09BE0800F1A96E /* VirtualObjects.json in Resources */,
 				F2E6917D21869AEA00619550 /* Main.storyboard in Resources */,
 				3929C49F1E89EE4400E00B60 /* Models.scnassets in Resources */,
+				F2E565D6218E85C400D0BAE7 /* Launch Screen.storyboard in Resources */,
 				F2B68E7820F82E1200423E57 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
