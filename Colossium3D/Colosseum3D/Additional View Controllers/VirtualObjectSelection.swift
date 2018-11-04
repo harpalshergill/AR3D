@@ -64,7 +64,7 @@ class VirtualObjectSelectionViewController: UITableViewController {
     
     func updateObjectAvailability(for planeAnchor: ARPlaneAnchor?) {
         var newEnabledVirtualObjectRows = Set<Int>()
-        for (row, object) in VirtualObject.availableObjects.enumerated() {
+        for (row, object) in VirtualObject.availableObjectSorted().enumerated() {
             // Enable row if item can be placed at the current location
             if object.isPlacementValid(on: planeAnchor) {
                 newEnabledVirtualObjectRows.insert(row)

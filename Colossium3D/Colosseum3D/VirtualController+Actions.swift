@@ -88,13 +88,13 @@ extension ViewController: UIPopoverPresentationControllerDelegate {
             segueIdentifer == .showObjects else { return }
         
         let objectsViewController = segue.destination as! VirtualObjectSelectionViewController
-        objectsViewController.virtualObjects = VirtualObject.availableObjects
+        objectsViewController.virtualObjects = VirtualObject.availableObjectSorted()
         objectsViewController.delegate = self
         self.objectsViewController = objectsViewController
         
         // Set all rows of currently placed objects to selected.
         for object in virtualObjectLoader.loadedObjects {
-            guard let index = VirtualObject.availableObjects.index(of: object) else { continue }
+            guard let index = VirtualObject.availableObjectSorted().index(of: object) else { continue }
             objectsViewController.selectedVirtualObjectRows.insert(index)
         }
     }

@@ -44,6 +44,20 @@ extension ViewController: VirtualObjectSelectionViewControllerDelegate {
         segmentControl.isHidden = false
     }
     
+    func placeVirtualObjectAtLoad(_ virtualObject: VirtualObject) {
+        
+        virtualObjectInteraction.translate(virtualObject, basedOn: screenCenter, infinitePlane: false, allowAnimation: false)
+        virtualObjectInteraction.selectedObject = virtualObject
+        
+        updateQueue.async {
+            self.sceneView.scene.rootNode.cleanup()
+            self.sceneView.scene.rootNode.addChildNode(virtualObject)
+            self.sceneView.addOrUpdateAnchor(for: virtualObject)
+        }
+        
+        segmentControl.isHidden = false
+    }
+    
     
     
     func RecoverplaceVirtualObjectForced(_ virtualObject: VirtualObject) {

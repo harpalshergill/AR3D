@@ -209,6 +209,22 @@ class VirtualObject: SCNReferenceNode {
 }
 
 extension VirtualObject {
+    
+    static func findObject(_ name: String) -> VirtualObject?{
+        for item in VirtualObject.availableObjects {
+            if(item.modelName.lowercased() == name.lowercased()){
+                return item;
+            }
+        }
+        return VirtualObject.availableObjects.last
+    }
+    
+    static func availableObjectSorted() -> [VirtualObject]{
+        
+        
+        
+        return VirtualObject.availableObjects.sorted(by:  {$0.modelName > $1.modelName} )
+    }
     // MARK: Static Properties and Methods
     
     /// Loads all the model objects within `Models.scnassets`.

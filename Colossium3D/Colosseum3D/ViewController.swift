@@ -140,7 +140,8 @@ class ViewController: UIViewController {
         // Set up scene content.
         setupCamera()
         //sceneView.scene.rootNode.addChildNode(focusSquare)
-        let obj = VirtualObject.availableObjects.last
+        
+        let obj = VirtualObject.findObject("templeofcaesar")
         loadme(object: obj!)
 
         sceneView.setupDirectionalLighting(queue: updateQueue)
@@ -166,7 +167,7 @@ class ViewController: UIViewController {
                 DispatchQueue.main.async {
                     self.hideObjectLoadingUI()
                     self.segmentControl.selectedSegmentIndex = 0
-                    self.placeVirtualObject(loadedObject)
+                    self.placeVirtualObjectAtLoad(loadedObject)
                     loadedObject.isHidden = false
                 }
             })
