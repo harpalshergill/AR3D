@@ -157,9 +157,9 @@ class ViewController: UIViewController {
         sceneView.addGestureRecognizer(tapGesture)
     }
     
-    deinit {
-        print("deinit")
-    }
+//    deinit {
+//        print("deinit")
+//    }
     
     func loadme(object: VirtualObject){
         virtualObjectLoader.loadVirtualObject(object, loadedHandler: { [unowned self] loadedObject in
@@ -216,7 +216,7 @@ class ViewController: UIViewController {
         virtualObjectInteraction.selectedObject = nil
         
         let configuration = ARWorldTrackingConfiguration()
-        configuration.planeDetection = [.horizontal, .vertical]
+        configuration.planeDetection = [.horizontal] //, .vertical]
         if #available(iOS 12.0, *) {
             configuration.environmentTexturing = .automatic
         }

@@ -36,7 +36,7 @@ extension ViewController: VirtualObjectSelectionViewControllerDelegate {
         virtualObjectInteraction.selectedObject = virtualObject
         
         updateQueue.async {
-            self.sceneView.scene.rootNode.cleanup()
+            //self.sceneView.scene.rootNode.cleanup()
             self.sceneView.scene.rootNode.addChildNode(virtualObject)
             self.sceneView.addOrUpdateAnchor(for: virtualObject)
         }
@@ -50,7 +50,7 @@ extension ViewController: VirtualObjectSelectionViewControllerDelegate {
         virtualObjectInteraction.selectedObject = virtualObject
         
         updateQueue.async {
-            self.sceneView.scene.rootNode.cleanup()
+            //self.sceneView.scene.rootNode.cleanup()
             self.sceneView.scene.rootNode.addChildNode(virtualObject)
             self.sceneView.addOrUpdateAnchor(for: virtualObject)
         }

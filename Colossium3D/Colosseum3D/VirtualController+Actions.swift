@@ -53,10 +53,10 @@ extension ViewController: UIGestureRecognizerDelegate {
         addObjectButton.setImage(#imageLiteral(resourceName: "add"), for: [])
         addObjectButton.setImage(#imageLiteral(resourceName: "addPressed"), for: [.highlighted])
         
-        updateQueue.async {
-            self.sceneView.scene.rootNode.cleanup()
-//            self.sceneView.addOrUpdateAnchor(for: virtualObject)
-        }
+//        updateQueue.async {
+//            self.sceneView.scene.rootNode.cleanup()
+////            self.sceneView.addOrUpdateAnchor(for: virtualObject)
+//        }
         
         resetTracking()
         
