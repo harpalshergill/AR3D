@@ -94,7 +94,7 @@ extension ViewController: UIPopoverPresentationControllerDelegate {
         
         // Set all rows of currently placed objects to selected.
         for object in virtualObjectLoader.loadedObjects {
-            guard let index = VirtualObject.availableObjectSorted().index(of: object) else { continue }
+            guard let index = VirtualObject.availableObjectSorted().firstIndex(of: object) else { continue }
             objectsViewController.selectedVirtualObjectRows.insert(index)
         }
     }

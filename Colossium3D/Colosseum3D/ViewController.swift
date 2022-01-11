@@ -49,7 +49,7 @@ class ViewController: UIViewController {
             self.sceneView.scene.rootNode.enumerateChildNodes { (node, _) in
                 if node.name == "SketchUp"{
                     
-                    var obj = self.virtualObjectLoader.loadedObjects
+                    let obj = self.virtualObjectLoader.loadedObjects
                     
                     switch(obj[0].modelName){
                     case "Colosseum":
@@ -97,7 +97,7 @@ class ViewController: UIViewController {
     
     /// The view controller that displays the status and "restart experience" UI.
     lazy var statusViewController: StatusViewController = {
-        return childViewControllers.lazy.compactMap({ $0 as? StatusViewController }).first!
+        return children.lazy.compactMap({ $0 as? StatusViewController }).first!
     }()
     
     /// The view controller that displays the virtual object selection menu.

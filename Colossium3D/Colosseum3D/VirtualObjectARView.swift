@@ -25,7 +25,7 @@ class VirtualObjectARView: ARSCNView {
     
     func smartHitTest(_ point: CGPoint,
                       infinitePlane: Bool = false,
-                      objectPosition: float3? = nil,
+                      objectPosition: SIMD3<Float>? = nil,
                       allowedAlignments: [ARPlaneAnchor.Alignment] = [.horizontal, .vertical]) -> ARHitTestResult? {
         
         // Perform the hit test.
@@ -148,8 +148,8 @@ extension SCNView {
      Type conversion wrapper for original `unprojectPoint(_:)` method.
      Used in contexts where sticking to SIMD float3 type is helpful.
      */
-    func unprojectPoint(_ point: float3) -> float3 {
-        return float3(unprojectPoint(SCNVector3(point)))
+    func unprojectPoint(_ point: SIMD3<Float>) -> SIMD3<Float> {
+        return SIMD3<Float>(unprojectPoint(SCNVector3(point)))
     }
     
     

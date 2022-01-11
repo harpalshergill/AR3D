@@ -96,7 +96,7 @@ extension ViewController: VirtualObjectSelectionViewControllerDelegate {
     }
     
     func virtualObjectSelectionViewController(_: VirtualObjectSelectionViewController, didDeselectObject object: VirtualObject) {
-        guard let objectIndex = virtualObjectLoader.loadedObjects.index(of: object) else {
+        guard let objectIndex = virtualObjectLoader.loadedObjects.firstIndex(of: object) else {
             fatalError("Programmer error: Failed to lookup virtual object in scene.")
         }
         virtualObjectLoader.removeVirtualObject(at: objectIndex)
